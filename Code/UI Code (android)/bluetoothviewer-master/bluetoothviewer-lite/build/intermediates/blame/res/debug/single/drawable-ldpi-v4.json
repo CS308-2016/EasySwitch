@@ -1,0 +1,22 @@
+[
+    {
+        "merged": "/home/siddhant/AndroidStudioProjects/bluetoothviewer-master/bluetoothviewer-lite/build/intermediates/res/merged/debug/drawable-ldpi-v4/launcher_main.png",
+        "source": "/home/siddhant/AndroidStudioProjects/bluetoothviewer-master/bluetoothviewer-lite/build/intermediates/exploded-aar/bluetoothviewer-master/bluetoothviewer/unspecified/res/drawable-ldpi-v4/launcher_main.png"
+    },
+    {
+        "merged": "/home/siddhant/AndroidStudioProjects/bluetoothviewer-master/bluetoothviewer-lite/build/intermediates/res/merged/debug/drawable-ldpi-v4/toolbar_btn_connect.png",
+        "source": "/home/siddhant/AndroidStudioProjects/bluetoothviewer-master/bluetoothviewer-lite/build/intermediates/exploded-aar/bluetoothviewer-master/bluetoothviewer/unspecified/res/drawable-ldpi-v4/toolbar_btn_connect.png"
+    },
+    {
+        "merged": "/home/siddhant/AndroidStudioProjects/bluetoothviewer-master/bluetoothviewer-lite/build/intermediates/res/merged/debug/drawable-ldpi-v4/toolbar_btn_play.png",
+        "source": "/home/siddhant/AndroidStudioProjects/bluetoothviewer-master/bluetoothviewer-lite/build/intermediates/exploded-aar/bluetoothviewer-master/bluetoothviewer/unspecified/res/drawable-ldpi-v4/toolbar_btn_play.png"
+    },
+    {
+        "merged": "/home/siddhant/AndroidStudioProjects/bluetoothviewer-master/bluetoothviewer-lite/build/intermediates/res/merged/debug/drawable-ldpi-v4/toolbar_btn_disconnect.png",
+        "source": "/home/siddhant/AndroidStudioProjects/bluetoothviewer-master/bluetoothviewer-lite/build/intermediates/exploded-aar/bluetoothviewer-master/bluetoothviewer/unspecified/res/drawable-ldpi-v4/toolbar_btn_disconnect.png"
+    },
+    {
+        "merged": "/home/siddhant/AndroidStudioProjects/bluetoothviewer-master/bluetoothviewer-lite/build/intermediates/res/merged/debug/drawable-ldpi-v4/toolbar_btn_pause.png",
+        "source": "/home/siddhant/AndroidStudioProjects/bluetoothviewer-master/bluetoothviewer-lite/build/intermediates/exploded-aar/bluetoothviewer-master/bluetoothviewer/unspecified/res/drawable-ldpi-v4/toolbar_btn_pause.png"
+    }
+]
