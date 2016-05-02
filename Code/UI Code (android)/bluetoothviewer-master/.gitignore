@@ -1,0 +1,17 @@
+# Intellij project files
+*.iml
+*.ipr
+*.iws
+.idea
+local.properties
+
+# gradle files
+.gradle
+build
+
+# misc
+tmp
+/keys
+/graphics/launchpad/
+/graphics/market/
+.DS_Store
