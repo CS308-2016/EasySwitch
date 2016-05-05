@@ -1,0 +1,217 @@
+/* 
+ * Team Leader: Ch Nitish Chandra
+ *
+ * Author List: Ch Nitish Chandra, T P Varun
+ *
+ * Filename: lab-2.c
+ *
+ * Functions: setup, switchPinConfig, ledPinConfig, main, Timer0IntHandler
+ *
+ * Global Variables: sw2Status, currentColor, state1, state2, currentCount1, currentCount2, sw1long, sw1short, sw2long, sw2short
+ *
+ *
+ *  */
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include "inc/hw_types.h"
+#include "inc/hw_memmap.h"
+#include "driverlib/sysctl.h"
+#include "driverlib/gpio.h"
+#include "driverlib/timer.h"
+#include "driverlib/interrupt.h"
+#include "inc/tm4c123gh6pm.h"
+
+#define LOCK_F (*((volatile unsigned long *)0x40025520))
+#define CR_F   (*((volatile unsigned long *)0x40025524))
+/* 
+ * Function Name: setup
+ * Input: None
+ * Output: None
+ * Logic: This function sets the clock and enables the GPIO peripheral
+ * Example Call: setup()
+ */
+void setup(void)
+{
+	SysCtlClockSet(SYSCTL_SYSDIV_4|SYSCTL_USE_PLL|SYSCTL_XTAL_16MHZ|SYSCTL_OSC_MAIN);
+	SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
+}
+/*
+ * Function Name: switchPinConfig
+ * Input: None
+ * Output: None
+ * Logic: This function configures Pin 0 and Pin 4 of PORT F as inputs
+ * Example Call: switchPinConfig()
+ */
+void switchPinConfig(void)
+{
+	// Following two line removes the lock from SW2 interfaced on PORTF Pin0 -- leave this unchanged
+	LOCK_F=0x4C4F434BU;
+	CR_F=GPIO_PIN_0|GPIO_PIN_4;
+
+	// GPIO PORTF Pin 0 and Pin4
+	GPIODirModeSet(GPIO_PORTF_BASE,GPIO_PIN_4|GPIO_PIN_0,GPIO_DIR_MODE_IN); // Set Pin-4 of PORT F as Input. Modifiy this to use another switch
+	GPIOPinTypeGPIOInput(GPIO_PORTF_BASE, GPIO_PIN_4 | GPIO_PIN_0);
+	GPIOPadConfigSet(GPIO_PORTF_BASE,GPIO_PIN_4|GPIO_PIN_0,GPIO_STRENGTH_2MA,GPIO_PIN_TYPE_STD_WPU);
+
+//	GPIODirModeSet(GPIO_PORTF_BASE,GPIO_PIN_0,GPIO_DIR_MODE_IN); // Set Pin-0 of PORT F as Input. Modifiy this to use another switch
+//	GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_0);
+//	GPIOPadConfigSet(GPIO_PORTF_BASE,GPIO_PIN_0,GPIO_STRENGTH_12MA,GPIO_PIN_TYPE_STD_WPU);
+}
+/* 
+ * Function Name: ledPinConfig
+ * Input: None
+ * Output: None
+ * Logic: Configures Pin 1,2,3 of PORT F as output pins
+ * Example Call: ledPinConfig()
+ */
+
+void ledPinConfig(void)
+{
+	GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3);  // Pin-1 of PORT F set as output. Modifiy this to use other 2 LEDs.
+}
+/* Variable sw2Status is used to denote the status of switch 2 i.e., whether it is pressed or not */
+int sw2Status = 1;
+/* currentColor denotes the current color of the LED */
+int currentColor = 2;
+
+/* 
+ * Function Name: main
+ * Input: None
+ * Output: int. This return type determines the status of this process to its parent process
+ * Logic: This function configures the peripherals appropriately and initialises the timer and runs in an infinite while loop waiting for some interrupts to be received
+ * Example Call: main()
+ */
+int main(void){
+
+	setup();
+	ledPinConfig();
+	switchPinConfig();
+
+	uint32_t ui32Period;
+
+	SysCtlClockSet(SYSCTL_SYSDIV_5|SYSCTL_USE_PLL|SYSCTL_XTAL_16MHZ|SYSCTL_OSC_MAIN);
+
+	SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
+	GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3);
+
+	SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER0);
+	TimerConfigure(TIMER0_BASE, TIMER_CFG_PERIODIC);
+
+	ui32Period = (SysCtlClockGet() / 100) / 2;
+	TimerLoadSet(TIMER0_BASE, TIMER_A, ui32Period -1);
+
+	IntEnable(INT_TIMER0A);
+	TimerIntEnable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
+	IntMasterEnable();
+
+	TimerEnable(TIMER0_BASE, TIMER_A);
+
+	while(1)
+	{
+	}
+
+
+}
+
+
+
+#define IDLE 1
+#define PRESS 2
+#define RELEASE 3
+#define PRESSED 0
+#define NOTPRESSED 1
+
+
+int state1= IDLE;
+int state2= IDLE;
+
+/* We have to implement a given FSM for both switch 1 and switch 2. state1 denotes the state in FSM of switch 1 and state2 denotes the state in FSM of switch 2 */
+
+/* currentCount1 denotes the current number of times switch 1 is pressed. currentCount2 denotes the current number of times switch 2 is pressed */
+int currentCount1 = 0, currentCount2 = 0;
+
+/* All the four variables are used for debugging purposes */
+int sw1long = 0, sw1short = 0, sw2long = 0, sw2short = 0;
+
+/* 
+ * Function Name: Timer0IntHandler
+ * Input: None
+ * Output: None
+ * Logic: This is the interrupt handler for Timer 0. This implements the FSM mentioned in the question. The three states in FSM are denoted by IDLE, PRESS, RELEASE. Based on the current state of each switch and depending on whether it is on or off, an action and optionally a state change is performed as per FSM
+ * Example Call: Timer0IntHandler()
+ */
+void Timer0IntHandler(void)
+{
+
+
+
+// Clear the timer interrupt
+TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
+
+
+
+// Read the current state of the GPIO pin and
+// write back the opposite state
+if(GPIOPinRead(GPIO_PORTF_BASE, GPIO_PIN_4) == PRESSED)
+{
+	if (state1  == IDLE) state1 = PRESS;
+	else if (state1 == PRESS) {
+		state1 = RELEASE;
+		currentCount1 = 1;
+		sw1long = 0;
+		sw1short = 0;
+	currentColor = currentColor / 2;
+					if(currentColor == 1){
+						currentColor = 8;
+					}
+
+					GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, currentColor);
+	}
+	else{
+		currentCount1++;
+	}
+
+
+
+}
+else
+{
+	if (state1 == PRESS) state1 = IDLE;
+	else if (state1 == RELEASE){
+		state1 = IDLE;
+		if(currentCount1 >= 100) sw1long = 1;
+		else sw1short = 1;
+	}
+	GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, 0);
+}
+
+if(GPIOPinRead(GPIO_PORTF_BASE, GPIO_PIN_0) == PRESSED)
+{
+	if (state2  == IDLE) state2 = PRESS;
+	else if (state2 == PRESS) {state2 = RELEASE;
+		currentCount2 = 1;
+		sw2short = 0;
+		sw2long = 0;
+		sw2Status++;
+	}
+	else{
+		currentCount2++;
+	}
+
+
+
+}
+else
+{
+	if (state2 == PRESS) state2 = IDLE;
+	else if (state2 == RELEASE){
+		state2 = IDLE;
+		if(currentCount2 >= 100) sw2long = 1;
+		else sw2short = 1;
+	}
+	//GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, 0);
+}
+}
+
+
